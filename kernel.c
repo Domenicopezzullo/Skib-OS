@@ -40,6 +40,7 @@ void _start() {
     while(1) {
         update_clock(250, 2, 15, 1);
         for(volatile int i = 0; i < 2000000; ++i);
+        __asm__ volatile ("hlt");
     }
     while(1) {__asm__ volatile("hlt"); }
 }
