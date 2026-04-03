@@ -5,7 +5,6 @@
 
 #include "font.h"
 
-#define LIBSKIB_IMPL
 #include "../include/libskib.h"
 
 #define VIDEO_ADDRESS 0xA0000

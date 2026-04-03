@@ -1,3 +1,6 @@
+#ifndef MEM_H
+#define MEM_H
+
 #include "io.h"
 
 unsigned short get_total_memory();
@@ -15,4 +18,5 @@ unsigned short get_total_memory() {
     return (high << 8) | low;
 }
 
+#endif
 #endif

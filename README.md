@@ -6,7 +6,5 @@
 2. **fasm**
 
 # Building instructions
-```sh
-make
-```
-and then you can just run with ```sh qemu-system-i386 -drive format=raw,file=build/os.bin ```
+build the binary with ```make```
+and then you can just run with ```qemu-system-i386 -fda build/os.bin```
