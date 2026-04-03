@@ -1,15 +1,36 @@
 #ifndef LIBSKIB_H
 #define LIBSKIB_H
 
+#include "../drivers/mem.h"
+
 extern int cursor;
 void update_hardware_cursor();
 
+void* malloc(unsigned int size);
 char* itoa(unsigned int val, int base, char* buf); 
 int strncmp(const char* s1, const char* s2, int n);
 int strcmp(char* s1, char* s2);
 int strlen(const char* s);
 
 #ifdef LIBSKIB_IMPL
+
+static char* heap_ptr = (char*)0x200000; 
+
+void* malloc(unsigned int size) {
+    if (size % 8 != 0) size += (8 - (size % 8));
+
+    char* next_ptr = heap_ptr + size; 
+    unsigned int max_address = (unsigned int)get_total_memory_kb() * 1024;
+
+    if ((unsigned int)next_ptr > max_address) {
+        return 0;
+    }
+
+    void* res = (void*)heap_ptr;
+    heap_ptr = next_ptr;
+    return res;
+}
+
 char* itoa(unsigned int val, int base, char* buf) {
     
     char digits[] = {'0','1','2','3','4','5','6','7','8','9','a','b','c','d','e','f'};
