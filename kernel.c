@@ -2,6 +2,7 @@
 #define UI_IMPL
 #define LIBSKIB_IMPL
 #define FONT_IMPL
+#define MEM_IMPL
 
 #include "drivers/ui.h"
 #include "drivers/vga.h"

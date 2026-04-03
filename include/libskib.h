@@ -20,7 +20,7 @@ void* malloc(unsigned int size) {
     if (size % 8 != 0) size += (8 - (size % 8));
 
     char* next_ptr = heap_ptr + size; 
-    unsigned int max_address = (unsigned int)get_total_memory_kb() * 1024;
+    unsigned int max_address = (unsigned int)get_total_memory() * 1024;
 
     if ((unsigned int)next_ptr > max_address) {
         return 0;
