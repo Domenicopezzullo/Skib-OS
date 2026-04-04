@@ -12,6 +12,7 @@ extern void mouse_handler_wrapper(void);
 extern void timer_handler_wrapper(void);
 
 #include "drivers/idt.h"
+#include "drivers/keyboard.h"
 #include "drivers/mouse.h"
 #include "drivers/ui.h"
 
