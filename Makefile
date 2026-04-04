@@ -1,10 +1,6 @@
 BUILD_DIR = build
 $(shell mkdir -p $(BUILD_DIR))
 
-.PHONY: all clean
-
-all: $(BUILD_DIR)/os.bin
-
 $(BUILD_DIR)/os.bin: $(BUILD_DIR)/bootloader.bin $(BUILD_DIR)/kernel.bin
 	dd if=/dev/zero bs=512 count=2880 of=$(BUILD_DIR)/os.bin
 	dd if=$(BUILD_DIR)/bootloader.bin of=$(BUILD_DIR)/os.bin conv=notrunc
