@@ -88,7 +88,7 @@ void print_hex(int x, int y, char* prefix, int val, unsigned int fg, unsigned in
     while(prefix[offset] != '\0') offset++;
     
     itoa(val, 16, buf);
-    draw_string(x + (offset * 8), y, buf, fg,bg, size);
+    draw_string(x + (offset * 8 * size), y, buf, fg,bg, size);
 }
 
 void draw_char(int x, int y, char c, unsigned int fg, unsigned int bg, int size) {

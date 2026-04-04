@@ -35,11 +35,12 @@ static char scancode_to_char[] = {
 
 __attribute__((used))
 void keyboard_handler() {
+    put_pixel(5,5,0x0000FF00);
     unsigned char status = inb(0x64);
     if (status & 0x01) {
         unsigned char scancode = inb(0x60);
         if (scancode < 0x80) {
-            draw_char(0,0,'*',15,0, 10);
+            draw_char(0,0,'*',0x0000FF00,0x001C6BA8, 2);
         }
     }
     outb(0x20,0x20);

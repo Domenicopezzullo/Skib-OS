@@ -35,7 +35,7 @@ void load_idt() {
     idtp.base  = (unsigned int)&idt;
 
     
-    __asm__ volatile("lidt (%0)" : : "r" (&idtp));
+    __asm__ volatile("lidt %0" : : "m" (idtp));
 }
 
 #endif
