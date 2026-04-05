@@ -12,6 +12,9 @@
 
 static inline unsigned int get_pitch() { return *(unsigned int *)0x0504; }
 
+void vga_init();
+void vga_flip();
+void draw_mouse_cursor(int x, int y);
 void draw_time(int x, int y, unsigned int fg, unsigned int bg);
 void print_hex(int x, int y, char *prefix, int val, unsigned int fg,
                unsigned int bg, int size);
@@ -26,6 +29,44 @@ void draw_hline(int x, int y, int w, unsigned int color);
 void draw_vline(int x, int y, int h, unsigned int color);
 void draw_rect_outline(int x, int y, int w, int h, unsigned int color);
 #ifdef VGA_IMPL
+
+void draw_mouse_cursor(int x, int y) {
+  unsigned char cursor_sprite[8] = {0x80, 0xC0, 0xF0, 0xF8, 0xFC, 0xFE, 0x00};
+  for (int i = 0; i < 8; i++) {
+    for (int j = 0; j < 8; j++) {
+      if (cursor_sprite[i] & (1 << (7 - j))) {
+        put_pixel(x + j, y + i, 0x00FFFFFF);
+      }
+    }
+  }
+}
+
+static unsigned int *back_buffer = 0;
+static unsigned int fb_pixels = SCREEN_WIDTH * SCREEN_HEIGHT;
+extern unsigned int fb_addr;
+extern unsigned int fb_pitch;
+
+void vga_flip() {
+  unsigned int *front = (unsigned int *)fb_addr;
+  unsigned int pitch_px = fb_pitch / 4;
+  unsigned int *bb = back_buffer;
+  for (int y = 0; y < SCREEN_HEIGHT; ++y) {
+    unsigned int *dst = front + y * pitch_px;
+    unsigned int *src = bb + y * SCREEN_WIDTH;
+    for (int x = 0; x < SCREEN_WIDTH; x += 4) {
+      dst[x] = src[x];
+      dst[x + 1] = src[x + 1];
+      dst[x + 2] = src[x + 2];
+      dst[x + 3] = src[x + 3];
+    }
+  }
+}
+
+void vga_init() {
+  back_buffer = (unsigned int *)malloc(fb_pixels * 4);
+  if (back_buffer == 0) {
+  }
+}
 
 void draw_time(int x, int y, unsigned int fg, unsigned int bg) {
   while (is_update_in_progress())
@@ -120,19 +161,20 @@ void draw_string(int x, int y, char *str, unsigned int fg, unsigned int bg,
 }
 
 void put_pixel(int x, int y, unsigned int color) {
+  if (!back_buffer)
+    return;
   if (x < 0 || x >= SCREEN_WIDTH || y < 0 || y >= SCREEN_HEIGHT)
     return;
 
-  unsigned int *fb = (unsigned int *)(*(unsigned int *)0x0500);
-  unsigned int pitch = get_pitch();
-
-  fb[y * (pitch / 4) + x] = color;
+  back_buffer[y * SCREEN_WIDTH + x] = color;
 }
 
 void clear_screen(unsigned int color) {
-  for (int y = 0; y < SCREEN_HEIGHT; y++)
-    for (int x = 0; x < SCREEN_WIDTH; x++)
-      put_pixel(x, y, color);
+  unsigned int *bb = back_buffer;
+  unsigned int count = SCREEN_WIDTH * SCREEN_HEIGHT;
+  for (unsigned int i = 0; i < count; ++i) {
+    bb[i] = color;
+  }
 }
 
 #endif

@@ -9,11 +9,21 @@ public timer_handler_wrapper
 section '.text' executable
 
 mouse_handler_wrapper:
-  pushad
-  cld
-  call mouse_handler
-  popad
-  iretd
+    pushad
+    push ds
+    push es
+    mov ax, 0x10
+    mov ds, ax
+    mov es, ax
+    cld
+    call mouse_handler
+    mov al, 0x20
+    out 0xA0, al
+    out 0x20, al
+    pop es
+    pop ds
+    popad
+    iretd
 
 timer_handler_wrapper:
   pushad

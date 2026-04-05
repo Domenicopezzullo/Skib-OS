@@ -11,8 +11,6 @@
 static unsigned int cursor_backup[64] = {0};
 static int cursor_initialized = 0;
 
-static unsigned char cursor_sprite[8] = {0x80, 0xC0, 0xE0, 0xF0,
-                                         0xF8, 0xFC, 0xFE, 0x00};
 void mouse_wait(unsigned char type);
 void mouse_write(unsigned char write);
 void mouse_install();
@@ -21,7 +19,7 @@ unsigned char mouse_read();
 
 #ifdef MOUSE_IMPL
 
-static int mouse_x = 400, mouse_y = 300;
+extern int mouse_x, mouse_y;
 static unsigned char mouse_state = 0;
 static signed char mouse_dx = 0, mouse_dy = 0;
 
@@ -38,30 +36,23 @@ unsigned char mouse_read() {
 unsigned char mouse_cycle = 0;
 unsigned char mouse_byte[3];
 void mouse_handler() {
-  unsigned char status = inb(MOUSE_STATUS_PORT);
-  if ((status & 0x01) == 0) {
-    outb(0xA0, 0x20);
-    outb(0x20, 0x20);
-    return;
-  }
   unsigned char data = inb(MOUSE_DATA_PORT);
-  if (mouse_state == 0 && (data & 0x08)) {
+
+  if (mouse_state == 0) {
+    if (!(data & 0x08))
+      return;
+
+    mouse_byte[0] = data;
     mouse_state = 1;
-    mouse_dx = 0;
-    mouse_dy = 0;
   } else if (mouse_state == 1) {
-    mouse_dx = (signed char)data;
+    mouse_byte[1] = data;
     mouse_state = 2;
   } else if (mouse_state == 2) {
-    mouse_dy = -((signed char)data);
+    mouse_byte[2] = data;
     mouse_state = 0;
 
-    int old_x = mouse_x;
-    int old_y = mouse_y;
-
-    mouse_x += mouse_dx;
-    mouse_y += mouse_dy;
-
+    mouse_x += (signed char)mouse_byte[1];
+    mouse_y -= (signed char)mouse_byte[2];
     if (mouse_x < 0)
       mouse_x = 0;
     if (mouse_x > SCREEN_WIDTH - 8)
@@ -70,37 +61,15 @@ void mouse_handler() {
       mouse_y = 0;
     if (mouse_y > SCREEN_HEIGHT - 8)
       mouse_y = SCREEN_HEIGHT - 8;
-
-    unsigned int *fb = (unsigned int *)(*(unsigned int *)0x0500);
-    unsigned int pitch_px = (*(unsigned int *)0x0504) / 4;
-
-    if (cursor_initialized) {
-      for (int i = 0; i < 8; i++) {
-        for (int j = 0; j < 8; j++) {
-          fb[(old_y + i) * pitch_px + (old_x + j)] = cursor_backup[i * 8 + j];
-        }
-      }
-    }
-
-    for (int i = 0; i < 8; i++) {
-      for (int j = 0; j < 8; j++) {
-        cursor_backup[i * 8 + j] = fb[(mouse_y + i) * pitch_px + (mouse_x + j)];
-      }
-    }
-
-    for (int i = 0; i < 8; i++) {
-      for (int j = 0; j < 8; j++) {
-
-        if (cursor_sprite[i] & (1 << (7 - j))) {
-          fb[(mouse_y + i) * pitch_px + (mouse_x + j)] = 0x00FFFFFF;
-        }
-      }
-    }
-
-    cursor_initialized = 1;
+    if (mouse_x < 0)
+      mouse_x = 0;
+    if (mouse_x > SCREEN_WIDTH - 8)
+      mouse_x = SCREEN_WIDTH - 8;
+    if (mouse_y < 0)
+      mouse_y = 0;
+    if (mouse_y > SCREEN_HEIGHT - 8)
+      mouse_y = SCREEN_HEIGHT - 8;
   }
-  outb(0xA0, 0x20);
-  outb(0x20, 0x20);
 }
 
 void mouse_install() {

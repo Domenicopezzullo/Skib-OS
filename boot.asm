@@ -119,7 +119,7 @@ pmode:
     mov fs, ax
     mov gs, ax
     mov ss, ax
-    mov esp, 0x90000
+    mov esp, 0xC00000
     mov esi, [0x7000]
     jmp 0x08:0x1000
 

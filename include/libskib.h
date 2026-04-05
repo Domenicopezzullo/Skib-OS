@@ -14,26 +14,11 @@ int strlen(const char *s);
 
 #ifdef LIBSKIB_IMPL
 
-static char *heap_ptr = (char *)0x200000;
-static unsigned int total_memory = 0;
-
 void *malloc(unsigned int size) {
-  if (size % 8 != 0)
-    size += (8 - (size % 8));
-
-  char *next_ptr = heap_ptr + size;
-  if (total_memory == 0) {
-    total_memory = (unsigned int)get_total_memory() * 1024;
-    if (total_memory == 0)
-      total_memory = 32 * 1024 * 1024;
-  }
-
-  if ((unsigned int)next_ptr > total_memory) {
-    return 0;
-  }
-
-  void *res = (void *)heap_ptr;
-  heap_ptr = next_ptr;
+  static unsigned char *heap_ptr = (unsigned char *)0x400000;
+  size = (size + 7) & ~7;
+  void *res = heap_ptr;
+  heap_ptr += size;
   return res;
 }
 
